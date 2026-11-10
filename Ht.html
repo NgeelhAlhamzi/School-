@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منهج الطالب اليمني - المنصة التعليمية وسوق القصص</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Arabic Font: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; color: #0F172A; }
+        .bg-navy { background-color: #0F172A; }
+        .text-navy { color: #0F172A; }
+        .border-navy { border-color: #0F172A; }
+        
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .chat-user { background-color: #0F172A; color: #FFFFFF; border-radius: 18px 18px 2px 18px; align-self: flex-end; }
+        .chat-ai { background-color: #FFFFFF; color: #0F172A; border-radius: 18px 18px 18px 2px; border: 1px solid #E2E8F0; }
+
+        /* Card Hover Animations */
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.15); }
+    </style>
+</head>
+<body class="pb-20 md:pb-10 min-h-screen flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm backdrop-blur-md bg-white/90">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3 animate__animated animate__fadeInRight">
+                <div class="w-11 h-11 bg-navy text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-md">
+                    <i class="fa-solid fa-graduation-cap text-amber-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black text-navy tracking-tight">منهج الطالب اليمني</h1>
+                    <p class="text-xs text-slate-500 font-semibold">المكتبة الرقمية الشاملة والمدرس الذكي</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="hidden md:flex items-center gap-2 font-bold text-sm bg-slate-100 p-1.5 rounded-xl border border-slate-200 animate__animated animate__fadeInDown">
+                <button onclick="switchTab('curriculum')" id="nav-curriculum" class="tab-btn px-4 py-1.5 rounded-lg bg-navy text-white transition shadow-sm">المنهج الدراسي</button>
+                <button onclick="switchTab('stories')" id="nav-stories" class="tab-btn px-4 py-1.5 text-slate-600 hover:text-navy transition">سوق القصص والروايات</button>
+                <button onclick="switchTab('submit-story')" id="nav-submit-story" class="tab-btn px-4 py-1.5 text-slate-600 hover:text-navy transition">أضف قصتك للنشر</button>
+            </nav>
+
+            <!-- User Auth & Quick AI -->
+            <div class="flex items-center gap-2 animate__animated animate__fadeInLeft">
+                <button onclick="openChatDrawer('عام - المنهج اليمني')" class="bg-navy text-white px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 hover:bg-slate-800 transition shadow">
+                    <i class="fa-solid fa-robot text-amber-400"></i>
+                    <span class="hidden sm:inline">المدرس الذكي</span>
+                </button>
+                <button id="userAuthBtn" onclick="openLoginModal()" class="border border-slate-300 hover:border-navy text-navy px-3 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 bg-slate-50 transition">
+                    <i class="fa-solid fa-user-graduate"></i>
+                    <span id="userAuthName">تسجيل الدخول</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Bar -->
+        <div class="md:hidden flex border-t border-slate-200 bg-slate-50 text-xs font-bold text-center justify-around py-2">
+            <button onclick="switchTab('curriculum')" class="text-navy flex flex-col items-center gap-1">
+                <i class="fa-solid fa-book-bookmark text-base"></i> المنهج
+            </button>
+            <button onclick="switchTab('stories')" class="text-slate-600 flex flex-col items-center gap-1">
+                <i class="fa-solid fa-feather text-base"></i> القصص
+            </button>
+            <button onclick="switchTab('submit-story')" class="text-slate-600 flex flex-col items-center gap-1">
+                <i class="fa-solid fa-file-circle-plus text-base"></i> انشر قصتك
+            </button>
+        </div>
+    </header>
+
+    <!-- Student Welcome / Notification Bar -->
+    <div id="welcomeBanner" class="bg-gradient-to-r from-slate-900 to-navy text-white text-xs py-2 px-4 shadow-inner">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="bg-amber-400 text-navy px-2 py-0.5 rounded text-[10px] font-extrabold">تنبيه المنهج</span>
+                <span id="studentGreeting">مرحباً بك في منصة منهج الطالب اليمني! جميع الكتب المدرسية والقصص متوفرة للمعاينة مجاناً.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full">
+
+        <!-- ==================== TAB 1: CURRICULUM ==================== -->
+        <section id="tab-curriculum" class="tab-content animate__animated animate__fadeIn">
+            <!-- Hero Banner -->
+            <div class="bg-navy text-white rounded-2xl p-6 md:p-8 mb-6 shadow-xl relative overflow-hidden">
+                <div class="absolute -left-10 -bottom-10 opacity-10 text-9xl">
+                    <i class="fa-solid fa-book"></i>
+                </div>
+                <div class="max-w-2xl relative z-10">
+                    <span class="bg-white/10 text-amber-300 border border-white/20 px-3 py-1 rounded-lg text-xs font-bold inline-block mb-3">
+                        <i class="fa-solid fa-check-circle"></i> المنهج اليمني المعتمد لجميع الصفوف الدراسية
+                    </span>
+                    <h2 class="text-2xl md:text-4xl font-black mb-3">مكتبة المنهج الدراسي والمدرس الذكي</h2>
+                    <p class="text-slate-300 text-sm md:text-base mb-6 leading-relaxed">
+                        طالع كتبك المدرسية مباشرة أو قم بتحميلها، واستعن بالمدرس الذكي التفاعلي ليشرح لك كافة المفاهيم والدروس.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <div class="relative w-full">
+                            <i class="fa-solid fa-magnifying-glass absolute right-4 top-4 text-slate-400"></i>
+                            <input type="text" id="curriculumSearch" onkeyup="filterBooks()" placeholder="ابحث باسم المادة (مثال: رياضيات، فيزياء، علوم...)" class="w-full pr-11 pl-4 py-3 rounded-xl text-navy text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        </div>
+                        <button onclick="filterBooks()" class="bg-amber-400 text-navy px-6 py-3 rounded-xl font-bold text-sm hover:bg-amber-300 transition whitespace-nowrap shadow">
+                            بحث سريع
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grade Selector -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 mb-6 flex flex-wrap gap-4 items-center justify-between shadow-sm">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <label class="text-sm font-bold text-navy whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-layer-group text-slate-500"></i> اختر الصف الدراسي:
+                    </label>
+                    <select id="gradeSelect" onchange="renderBooks()" class="w-full md:w-auto border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-navy bg-slate-50 focus:outline-none focus:border-navy">
+                        <option value="1">الصف الأول الأساسي</option>
+                        <option value="2">الصف الثاني الأساسي</option>
+                        <option value="3">الصف الثالث الأساسي</option>
+                        <option value="4">الصف الرابع الأساسي</option>
+                        <option value="5">الصف الخامس الأساسي</option>
+                        <option value="6">الصف السادس الأساسي</option>
+                        <option value="7">الصف السابع الأساسي</option>
+                        <option value="8">الصف الثامن الأساسي</option>
+                        <option value="9">الصف التاسع الأساسي</option>
+                        <option value="10">الصف الأول الثانوي</option>
+                        <option value="11-sci">الصف الثاني الثانوي (علمي)</option>
+                        <option value="11-lit">الصف الثاني الثانوي (أدبي)</option>
+                        <option value="12-sci" selected>الصف الثالث الثانوي (علمي)</option>
+                        <option value="12-lit">الصف الثالث الثانوي (أدبي)</option>
+                    </select>
+                </div>
+                <div class="text-xs text-slate-500 font-bold">
+                    <span id="booksCountBadge" class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">الكتب المتاحة جاهزة</span>
+                </div>
+            </div>
+
+            <!-- Books Grid -->
+            <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- ==================== TAB 2: STORIES MARKETPLACE ==================== -->
+        <section id="tab-stories" class="tab-content hidden animate__animated animate__fadeIn">
+            <div class="bg-gradient-to-r from-navy to-slate-800 text-white rounded-2xl p-6 md:p-8 mb-6 shadow-xl">
+                <div class="max-w-2xl">
+                    <span class="bg-amber-400 text-navy text-[11px] font-extrabold px-3 py-1 rounded-md uppercase tracking-wider mb-2 inline-block">سوق القصص والأدب</span>
+                    <h2 class="text-2xl md:text-3xl font-black mb-2">مكتبة القصص للأطفال والشباب</h2>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        تصفح واستمتع بقراءة أشهر قصص الأطفال والأدب العالمي والمحلي مجاناً وبمعاينة مباشرة.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Story Category Filter -->
+            <div class="flex gap-2 mb-6 border-b border-slate-200 pb-3">
+                <button onclick="filterStoryCategory('all')" id="cat-all" class="story-cat-btn bg-navy text-white px-4 py-1.5 rounded-lg text-xs font-bold transition">الكل</button>
+                <button onclick="filterStoryCategory('kids')" id="cat-kids" class="story-cat-btn bg-slate-200 text-slate-700 px-4 py-1.5 rounded-lg text-xs font-bold transition">قصص الأطفال</button>
+                <button onclick="filterStoryCategory('youth')" id="cat-youth" class="story-cat-btn bg-slate-200 text-slate-700 px-4 py-1.5 rounded-lg text-xs font-bold transition">قصص الشباب والأدب</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="storiesGrid">
+                <!-- Stories rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: SUBMIT NEW STORY ==================== -->
+        <section id="tab-submit-story" class="tab-content hidden animate__animated animate__fadeIn">
+            <div class="max-w-2xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md">
+                <div class="text-center mb-6">
+                    <div class="w-14 h-14 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 shadow-inner">
+                        <i class="fa-solid fa-feather-pointed"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-navy">انشر قصتك في منصة منهج الطالب اليمني</h2>
+                    <p class="text-slate-500 text-sm mt-1">هل أنت كاتب أو مؤلف؟ أرسل قصتك لتتم مراجعتها ونشرها بالسوق للمستفيدين!</p>
+                </div>
+
+                <form action="https://formsubmit.co/ngeelhmohamed1@hu.edu.ye" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <input type="hidden" name="_captcha" value="false">
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">اسم الكاتب / المؤلف الثلاثي <span class="text-red-500">*</span></label>
+                        <input type="text" name="name" required placeholder="أدخل اسم الكاتب هنا..." class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-navy">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-navy mb-1">رقم الواتساب للتواصل <span class="text-red-500">*</span></label>
+                            <input type="tel" name="phone" required placeholder="77XXXXXXX" class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-navy">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-navy mb-1">بريدك الإلكتروني</label>
+                            <input type="email" name="email" placeholder="example@gmail.com" class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-navy">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">عنوان القصة أو الرواية <span class="text-red-500">*</span></label>
+                        <input type="text" name="story_title" required placeholder="أدخل عنوان القصة..." class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-navy">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">صورة غلاف القصة (اختياري)</label>
+                        <input type="file" name="story_cover" accept="image/*" class="w-full border border-slate-300 rounded-xl px-4 py-2 text-xs text-slate-500 focus:outline-none focus:border-navy bg-slate-50">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">نبذة تعريفية مختصرة عن القصة <span class="text-red-500">*</span></label>
+                        <textarea name="story_brief" rows="2" required placeholder="اكتب سطرين إلى ثلاثة تشرح فكرة القصة وأهميتها التربوية..." class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-navy"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">نص الفصل الأول (المجاني للقراء) <span class="text-red-500">*</span></label>
+                        <textarea name="chapter_one" rows="4" required placeholder="ضع هنا نص الفصل الأول ليتمكن الطلاب والزوار من قراءته مجاناً..." class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-navy"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">رابط باقي الفصول أو القصة الكاملة <span class="text-red-500">*</span></label>
+                        <textarea name="full_story_link" rows="3" required placeholder="ضع رابط Google Drive يحتوي ملف القصة كاملاً أو الصق باقي الفصول..." class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-navy"></textarea>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <label class="block text-xs font-bold text-navy mb-1">بيانات تحويل أرباح المبيعات</label>
+                        <input type="text" name="bank_account" placeholder="أدخل رقم الحساب واسم البنك/المصرف..." class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-navy bg-white">
+                    </div>
+
+                    <button type="submit" class="w-full bg-navy text-white py-3.5 rounded-xl font-bold text-sm hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-paper-plane text-amber-400"></i>
+                        <span>إرسال القصة إلى الإدارة للمراجعة والنشر</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 font-semibold">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
+            <p>© جميع الحقوق محفوظة - منصة منهج الطالب اليمني الذكي</p>
+        </div>
+    </footer>
+
+    <!-- ==================== MODAL 1: BOOK VIEWER ==================== -->
+    <div id="previewModal" class="fixed inset-0 bg-black/75 z-50 flex flex-col items-center justify-center p-2 md:p-6 hidden backdrop-blur-sm animate__animated animate__fadeIn">
+        <div class="bg-white rounded-2xl w-full max-w-5xl h-[92vh] flex flex-col overflow-hidden shadow-2xl relative">
+            <div class="bg-navy text-white px-5 py-3.5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-book-open text-amber-400 text-lg"></i>
+                    <h3 id="previewModalTitle" class="font-bold text-sm md:text-base">معاينة الملف المعتمد</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openChatFromPreview()" class="bg-amber-400 text-navy px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-300 transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-robot"></i>
+                        <span>اسأل الذكاء عن هذا الكتاب</span>
+                    </button>
+                    <a id="previewDownloadBtn" href="#" target="_blank" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i>
+                        <span class="hidden sm:inline">تحميل / فتح</span>
+                    </a>
+                    <button onclick="closePreviewModal()" class="text-slate-300 hover:text-white text-2xl pr-2">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 bg-slate-100 relative">
+                <iframe id="pdfViewerFrame" class="w-full h-full border-none" src="" allow="autoplay"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: PAYMENT ==================== -->
+    <div id="paymentModal" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm animate__animated animate__fadeIn">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button onclick="closePaymentModal()" class="absolute top-4 left-4 text-slate-400 hover:text-navy text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center text-xl mx-auto mb-2">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+                <h3 class="text-lg font-black text-navy">تفعيل القصة عبر الصرافة المحلية</h3>
+                <p class="text-xs text-slate-500 font-semibold mt-1">القيمة: <strong class="text-navy text-sm font-black">1,000 ريال يمني فقط</strong></p>
+            </div>
+
+            <!-- Payment Methods Boxes -->
+            <div class="space-y-3 mb-6">
+                <!-- Kuraimi -->
+                <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50 hover:border-navy transition">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-extrabold text-navy text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-building-columns text-blue-600"></i> بنك الكريمي الإسلامي (حساب صرافة)
+                        </span>
+                        <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded">مباشر</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs mt-2 bg-white p-2 rounded-lg border border-slate-200">
+                        <span class="text-slate-600 font-semibold">رقم الحساب:</span>
+                        <span class="font-mono font-bold text-navy text-sm" id="kuraimiAcc">3001234567</span>
+                        <button onclick="copyToClipboard('kuraimiAcc')" class="text-navy hover:text-amber-600 text-xs font-bold flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> نسخ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Al-Omqi -->
+                <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50 hover:border-navy transition">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-extrabold text-navy text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-money-bill-transfer text-emerald-600"></i> شركة العمقي وإخوانه للصرافة
+                        </span>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">حوالة</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs mt-2 bg-white p-2 rounded-lg border border-slate-200">
+                        <span class="text-slate-600 font-semibold">رقم الحساب:</span>
+                        <span class="font-mono font-bold text-navy text-sm" id="omqiAcc">254000889</span>
+                        <button onclick="copyToClipboard('omqiAcc')" class="text-navy hover:text-amber-600 text-xs font-bold flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> نسخ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 pt-4">
+                <a id="waConfirmBtn" href="https://wa.me/967770000000?text=مرحباً%20إدارة%20المنصة،%20قمت%20بتحويل%20مبلغ%20القصة" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>إرسال إشعار السداد عبر الواتساب للتفعيل</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 3: STUDENT LOGIN / PROFILE ==================== -->
+    <div id="loginModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm animate__animated animate__fadeIn">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
+            <button onclick="closeLoginModal()" class="absolute top-4 left-4 text-slate-400 hover:text-navy text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 bg-navy text-white rounded-2xl flex items-center justify-center text-xl mx-auto mb-2 shadow">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h3 class="font-black text-navy text-lg">ملف الطالب الشخصي</h3>
+                <p class="text-xs text-slate-500 font-semibold">احفظ معلوماتك ومرحلتك الدراسية</p>
+            </div>
+
+            <form onsubmit="saveStudentProfile(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-navy mb-1">اسم الطالب / الطالبة:</label>
+                    <input type="text" id="studentNameInput" required placeholder="أدخل اسم الطالب..." class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-navy focus:outline-none focus:border-navy">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-navy mb-1">المرحلة الدراسية الحالية:</label>
+                    <select id="studentGradeInput" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-navy focus:outline-none focus:border-navy">
+                        <option value="9">الصف التاسع الأساسي</option>
+                        <option value="10">الأول الثانوي</option>
+                        <option value="11-sci">الثاني الثانوي (علمي)</option>
+                        <option value="12-sci" selected>الثالث الثانوي (علمي)</option>
+                        <option value="12-lit">الثالث الثانوي (أدبي)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-navy text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow">
+                    حفظ ومتابعة الدراسة
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== DRAWER: REAL AI CHAT ==================== -->
+    <div id="aiChatDrawer" class="fixed inset-y-0 left-0 max-w-md w-full bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-r border-slate-200">
+        <!-- Chat Header -->
+        <div class="bg-navy text-white p-4 flex items-center justify-between shadow">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-400 text-navy rounded-xl flex items-center justify-center font-bold text-lg shadow-sm">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-sm" id="chatSubjectTitle">المدرس الذكي اليمني</h3>
+                    <p class="text-[11px] text-emerald-400 flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span> متصل وجاهز للشرح الدقيق
+                    </p>
+                </div>
+            </div>
+            <button onclick="closeChatDrawer()" class="text-slate-300 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Context Badge & Actions -->
+        <div class="bg-slate-100 p-2.5 border-b border-slate-200 text-xs flex items-center justify-between">
+            <span class="text-slate-600 font-bold" id="currentChatContextBadge">المادة: المنهج العام</span>
+            <button onclick="clearChatHistory()" class="text-slate-500 hover:text-red-600 text-[11px] flex items-center gap-1 font-semibold">
+                <i class="fa-solid fa-trash-can"></i> مسح المحادثة
+            </button>
+        </div>
+
+        <!-- Quick Prompts Bar -->
+        <div class="px-3 py-2 bg-slate-50 border-b border-slate-200 flex gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap">
+            <button onclick="sendQuickPrompt('اشرح لي أهم القوانين والمفاهيم الأساسية في هذا الدرس')" class="bg-white border border-slate-300 px-2.5 py-1 rounded-full text-slate-700 hover:border-navy hover:text-navy">💡 أهم المفاهيم</button>
+            <button onclick="sendQuickPrompt('أعطني أسئلة اختيار من متعدد وزارية مع الحل والتعليل')" class="bg-white border border-slate-300 px-2.5 py-1 rounded-full text-slate-700 hover:border-navy hover:text-navy">📝 أسئلة وزارية</button>
+            <button onclick="sendQuickPrompt('لخص لي الوحدة الأولى في نقاط مبسطة وسهلة الحفظ')" class="bg-white border border-slate-300 px-2.5 py-1 rounded-full text-slate-700 hover:border-navy hover:text-navy">📑 تلخيص الدرس</button>
+        </div>
+
+        <!-- Chat Messages Container -->
+        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs md:text-sm">
+            <div class="flex items-start gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-navy text-white flex items-center justify-center text-xs flex-shrink-0">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="chat-ai p-3.5 shadow-sm">
+                    مرحباً بك! أنا معلمك الذكي للمنهج اليمني. اكتب سؤالك هنا وسأشرحه لك بأسلوب مبسط ورسمي دون رموز أو نجوم 🎓
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="p-3 bg-white border-t border-slate-200 flex gap-2">
+            <input type="text" id="chatInput" onkeypress="handleKeyPress(event)" placeholder="اسأل المدرس الذكي عن أي درس..." class="flex-1 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-navy focus:outline-none focus:border-navy">
+            <button onclick="sendChatMessage()" class="bg-navy text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition">
+                <i class="fa-solid fa-paper-plane text-amber-400"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Script -->
+    <script>
+        let currentSubject = "عام - المنهج اليمني";
+
+        // قاعدة البيانات المنظمة للمواد الدراسية (تجمع أجزاء المادة الواحدة مع خيارات الأجزاء)
+        const yemenBooksData = {
+            "1": [
+                { name: "القراءة", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1od7wpXoDzFQ5-VwTKUDzCpTNQBFPLVlf" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=16z-74E2M9kUwaI_V9qowuSLs4lHh3km5" }] },
+                { name: "أقرأ وأتعلم", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1thXlqIqKlsG70M4ecu_Zficss4zW-IGr" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1rr8vKSSKZZJWJIOh9hv3eMcak2NQfyNK" }] },
+                { name: "القرآن الكريم والتربية الإسلامية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1Wgm8fDxTUP1-Cdcf1HOalzohnnKOj3N7" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1RApxkfYy7FTZWXz555iaJhnDU8xpIV5C" }] },
+                { name: "الرياضيات", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1cmA7NAiVltJXL9gidd9bbBw4r4H74Ru1" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1bdGmq48CHIjNOecgzdVGcv5HBwAaN4bq" }] },
+                { name: "العلوم", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1ji_3Ih_Bkc-DwcttDfDqkzoG-2TrCB3i" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1EsZYUrgTjpXkDo6PU3nGCOpHz3jz1ghv" }] }
+            ],
+            "2": [
+                { name: "القراءة", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1t6DkMlTdjKJsGcVmuzHr8KSNPiYHQE-W" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=11PHO-qV7tQ0e3FNvASo_vFnQn-Xt-UDY" }] },
+                { name: "القرآن الكريم والتربية الإسلامية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1mxS6AjeI60B--INSYYF9mRVFbZNzPSjF" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1ZiRWxaYXVAW5NHyCjJQw-alMwv-eEG2r" }] },
+                { name: "الرياضيات", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1CSuTd0T_BbC4iVBfjD_EZFGqjc0Q05nO" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1psi1ZxLL9ljIaYubvPz4KImNl-aiVNcT" }] },
+                { name: "العلوم", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1H0Kq5RNZg1UOh4u47ucKALYVAJCiLyjx" }] }
+            ],
+            "3": [
+                { name: "القراءة", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1BriwLcC00VxAkSQKvEs8aeVl2vH-ePi3" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1KqQSo1vkgR6GRYMMo3wypP6nTEyWwtrO" }] },
+                { name: "القرآن الكريم والتربية الإسلامية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1SwHFSFbnr9piZdde7F1X4MAYCyE45egc" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1Og1XAM31DteUmRb1UQjIMb3YJ5AEZ8ce" }] },
+                { name: "الرياضيات", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1oeLWnWM4URwVfQ7vlW3t-PoyCzxJRF9_" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1qzIzlZNBt6TgVkcnwMacrxsznbVGR94I" }] },
+                { name: "العلوم", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1WSDhKJBM3bNW1Kk_O2J4EuHcAfBC90XC" }] },
+                { name: "التربية الاجتماعية", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1ayBjz7u_dzx4xFT3DiQaRmkKUxDzI1rr" }] }
+            ],
+            "4": [
+                { name: "لغتي العربية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1Kuk80nsjQnLTVBwECEGWYm4jealCM58E" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1MEd6MftfbEBDhOQ8xjK-5P0QvPPwe9k9" }] },
+                { name: "القرآن الكريم وعلومه", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=12SinT2CJRkHbLoRIrSXgtOxhkOCzm3IV" }] },
+                { name: "التربية الإسلامية", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1kqaMk5Bsaw5L3UKDNH4kXGNprfHQI74t" }] },
+                { name: "الرياضيات", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1HmvuAo285oZmETdxx1DLLarYGBlofQ48" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1RDCv3crBXDDMS7dKsbvt8PfRdN-2MuAn" }] },
+                { name: "العلوم", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1NgZ5HlGJBokWHGgLGbYtEXMMLLmhTmzl" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1uGujxlVhamhKxjBKWoaGsbFONgu36nYh" }] },
+                { name: "التربية الاجتماعية", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1lAOQrFwbbCG33cERbSGNclCr1d0Gfs7u" }] }
+            ],
+            "5": [
+                { name: "لغتي العربية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1YzOJenq8AJlXLC76KihxzfPZEt4Q6xub" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1sspT6oLBdk3RLsNXcOEvrpS0ab7vy6Nx" }] },
+                { name: "القرآن الكريم", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1CeC4Ot3CVw7wmkaYP4hLFSFKN4jD_6HM" }] },
+                { name: "التربية الإسلامية", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1IxkMxPQ2yJMBS7Ac-iCqLwje8x3qgJAB" }] },
+                { name: "الرياضيات", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1fXoGyF9biMiQANQ92MQ-gYAVPCMwykwk" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1_oYUh7zHl6U_s6lxgminjeG2AcMs0bLe" }] },
+                { name: "العلوم", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1ed4j4EEy2Nr6elLJbY4WNck2ll9q_gTe" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=14pGb_CnmNJHreZNdj0cgXZ2V9337sa1N" }] },
+                { name: "التاريخ", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1DWextERKtGqeOVfI5In4ZCVLwSqYbIli" }] },
+                { name: "الجغرافيا", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1gZhmS2b2BUuhHB97MEXqSuJPXkLZfCEk" }] },
+                { name: "التربية الوطنية", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1gOPomfFaV-J43Ms6nxjySaHpTjPHSs0L" }] }
+            ],
+            "6": [
+                { name: "لغتي العربية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1ZDvzLlXpyQlkGfM5uPUZbY25PJBFVMOr" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1iNPTICJI3yZVtaePQJHoSfZX5iRsxnTb" }] },
+                { name: "القرآن الكريم وعلومه", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1Jlz-ZJgdjq_LF-fvM0EFhXarWznIdeSy" }] },
+                { name: "التربية الإسلامية", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1R5ffpS_b3AQqccetqPPhKwAPLD7RXRvN" }] },
+                { name: "الرياضيات", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1itVI1f24sG9thH1RGv_r5UHPi1k-wOz4" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1PUeLEqQux2o7qyuTJyqt5G2Kp8to_-CU" }] },
+                { name: "العلوم", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1zmwivFsXmnFkbOivxk_zC8wl8rT1f0xr" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1dY1hTk_TB7gri12lVvi0EoVQNFK1GqWu" }] },
+                { name: "التاريخ", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1djoRxE8FvRFb1AX7DlFCD0IdaWYgWVxZ" }] },
+                { name: "الجغرافيا", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1MVZUTnFEZBURLNdtTf-rsHQ9Y4w84I-Q" }] },
+                { name: "التربية الوطنية", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=18ydoF3QG4ZLJ4MugTcReirk1uHCpJuYU" }] }
+            ],
+            "7": [
+                { name: "لغتي العربية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1irGvHc6slZido_d-evfXY11ea39_dyrZ" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=18VQWW8F7q8irUeyC2vbSbRLm9xnm_vh7" }] },
+                { name: "القرآن الكريم وعلومه", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1tJEfhRUYf_j3iKBiarGQJxxJ_pogJla3" }] },
+                { name: "التربية الإسلامية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1IGdxjHtUBLEcV_K2yUy1MFJ0VRkxU6hh" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1MlCBfuGmwvjGzBYiNHh8e14P6x2JgcxG" }] },
+                { name: "الرياضيات", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1kjw6ipjvME9nfwiMb4ZmogaZ1prIAi4v" }] },
+                { name: "العلوم", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1Y-XEMuiLkyBhoF6nJFfC3BHuUI4uxyhT" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1QS6pMJwg_GJapjQoAdBtjf-2TsuuvNAZ" }] }
+            ],
+            "8": [
+                { name: "لغتي العربية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=12a4IwWNCHWvLZrtSVqc9KAyR1nKo7ka1" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1d6ZkdV7pplQB3Akr2hE098o4Gl_sHeC-" }] },
+                { name: "القرآن الكريم وعلومه", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1Eief-HFK_0rbsoRIDd9V56oPoNl_h9LZ" }] },
+                { name: "التربية الإسلامية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=18A6XFZ4Idl47wzD8fzJ3yCbVhm7Y0_S7" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1SDLlHwQV7mvk-xGzI10c2oN2A-elcbUv" }] },
+                { name: "الرياضيات", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=160PbkdQStZzUiu-gqV_hton9exu1o8_w" }] },
+                { name: "العلوم", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1H6YgRLUwy9lHm3DKjy5nx5gg8oiJrsim" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1D7jX2s8Qbel8fD-LNskSCPqIU_Uo3gjJ" }] }
+            ],
+            "9": [
+                { name: "لغتي العربية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1v7q__Rdp-q39tjwW_LCZ_phWDXU0XGAs" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=18DjSjNd25Td_F82IsmzEBhjenT3bHC07" }] },
+                { name: "القرآن الكريم وعلومه", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=16KrBl2TKjHjd_-8ZSBCnGJT-wKoEmmcl" }] },
+                { name: "التربية الإسلامية", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1ynJXqRwRq5VM54gI6RiW0lAPcdPQgTqT" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=14lTHLe_VGy0EIvFtIRcI6CJf4nNi43M_" }] },
+                { name: "الرياضيات", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1ioa7gRC1yvXlok7DfW3uC5CGnod_0chS" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1xUXTbGeCQUxFgCVJ3YtYGKN7o7kKwUL4" }] },
+                { name: "العلوم", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1jyrePAPLyEZ4E3M9cX71IV3pbqNnhuBz" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1Io71R5u115oX9A2oWPlR-N22RWz4WLtA" }] }
+            ],
+            "10": [
+                { name: "القراءة", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=12T8nrkLzfEU9ZjxAD9hNY_4c_wDA3qqc" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1d0BKRN1dB90kfcopwKmjXSA3ij7GEZ7a" }] },
+                { name: "النحو والصرف", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1gds-YoE_PMv_IHvnOYoJJJJm4Nb_h1CO" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1Ci3onoOfJ6NN0QS1vbhty6XmNwnzkYpz" }] },
+                { name: "القرآن الكريم وعلومه", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1rgha8039xK4Rs-83LRM-HDDxqzngyekV" }] },
+                { name: "الفيزياء", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1C4t0TB-EFmfFqF8WbXOqMfkN4w-Ua3MO" }] },
+                { name: "الكيمياء", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1NPjKxdwWZ2xd7CBvA2C_VJcmfWl8i2Be" }] },
+                { name: "الأحياء", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1yxWc4UFKfVUtf7QLRxVYyELYy6zlPVjI" }] }
+            ],
+            "11-sci": [
+                { name: "القرآن الكريم وعلومه", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1A46f_umuDQMkAAAVXJI5f-0X7BtgUUx0" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1p7O8kdfH1S00jpBfq6ah7sZS-iKG6EIy" }] },
+                { name: "الرياضيات العلمي", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=12IFlq06rbHKfrGPBtZcTZA156CejYugy" }, { name: "الجزء الثاني", url: "https://drive.google.com/uc?export=download&id=1BZpt6MytvrVZQImCWGz-AbcgbTyDAaFy" }] },
+                { name: "الفيزياء", parts: [{ name: "القسم العلمي", url: "https://drive.google.com/uc?export=download&id=1w5m030N_ZDcACcUvyFwsAFTuzvaHpbmn" }] },
+                { name: "الكيمياء", parts: [{ name: "القسم العلمي", url: "https://drive.google.com/uc?export=download&id=1iScZ21fdQLt_6JZkYnmZn1h_9XrpU6hK" }] },
+                { name: "الأحياء", parts: [{ name: "القسم العلمي", url: "https://drive.google.com/uc?export=download&id=1jBYIHymtKSU-DIdRB3px88qlNnF0Y8R1" }] }
+            ],
+            "11-lit": [
+                { name: "القرآن الكريم وعلومه", parts: [{ name: "الجزء الأول", url: "https://drive.google.com/uc?export=download&id=1A46f_umuDQMkAAAVXJI5f-0X7BtgUUx0" }] },
+                { name: "الرياضيات", parts: [{ name: "القسم الأدبي", url: "https://drive.google.com/uc?export=download&id=1ldukDSPa5ZboslHH98oIl3LH1O7_k_tK" }] },
+                { name: "التاريخ", parts: [{ name: "الجزء الأول الأدبي", url: "https://drive.google.com/uc?export=download&id=1Bno-rCoibTfzWtqSH7adnG0ZQclv6dQ-" }] },
+                { name: "الجغرافيا", parts: [{ name: "القسم الأدبي", url: "https://drive.google.com/uc?export=download&id=1ZRBbXEtfzH2PVSVtllfW7MaYePEcskL-" }] },
+                { name: "علم الاجتماع", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1G5pTCJnGE5boX_dZBi-YIPAtcRDuaGDD" }] }
+            ],
+            "12-sci": [
+                { name: "القراءة", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1-J0Ttwd4fldNQPVcua7fcXuXdSiO9HDL" }] },
+                { name: "النحو والصرف", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1QARbS5g7DGMaSwfhPb1NX_5jjvX-vgT-" }] },
+                { name: "الأدب والنصوص والنقد", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1D4Y6VkJK4zWqkVbj4GyHU4dvaC2kddsn" }] },
+                { name: "القرآن الكريم وعلومه", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1NMJ-GAj8KXA93CxWZLiVVja0cWLOVKEV" }] },
+                { name: "التربية الإسلامية - الإيمان", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1yAF-LPsbI_yR8TkUVCiJCXN86LkxXCL2" }] },
+                { name: "الحديث والفقه", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1LdHuIigaVTnM27mAbzYhjcsjQgyFkkVO" }] },
+                { name: "السيرة النبوية", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=17QmQD4X6K5Lll6uFnIIAIyf_GBeitWim" }] },
+                { name: "الفيزياء", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1QHBJGDDyLw5t6-DhHclNrBfjv3cRFwso" }] },
+                { name: "الكيمياء", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1npbDViLDo2IkBPZUdzP61CINKosYc1fS" }] },
+                { name: "الأحياء", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1R3thzGzkqsx70MAeCwsl-K9iSc1N3r4J" }] },
+                { name: "الرياضيات العلمي", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1lXyTbqKwgzUYVHXOWQ_u_vo2Y_7PTOhm" }] }
+            ],
+            "12-lit": [
+                { name: "القراءة", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1-J0Ttwd4fldNQPVcua7fcXuXdSiO9HDL" }] },
+                { name: "النحو والصرف", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1QARbS5g7DGMaSwfhPb1NX_5jjvX-vgT-" }] },
+                { name: "الرياضيات الأدبي", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1-Szs5j3XIAzr8ulmZwWjvRjoG7BMfJLe" }] },
+                { name: "التاريخ", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1FYbqa49PazkMZhbMqtcWeaESt_Pwobcw" }] },
+                { name: "الجغرافيا", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1qicjE2xJDk9-YoGaSuW38V4MxNXnpPMm" }] },
+                { name: "علم النفس", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1n5tKIr4toav3xulv8SwSqEJFQpNpbNaK" }] },
+                { name: "مبادئ الفلسفة", parts: [{ name: "الكتاب كامل", url: "https://drive.google.com/uc?export=download&id=1K-8KhFD3stMXvEIw7n6Zu4nr3iui3zq9" }] }
+            ]
+        };
+
+        // مكتبة القصص المتنوعة بدعم صور مخصصة لكل قصة
+        const storiesList = [
+            // قصص الأطفال بحسب الصور المعبرة
+            { category: "kids", title: "أنا ألعب مع الجميع", cover: "https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hayyi.app/stories/%D8%A3%D9%86%D8%A7%20%D8%A3%D9%84%D8%B9%D8%A8%20%D9%85%D8%B9%20%D8%A7%D9%84%D8%AC%D9%85%D9%8A%D8%B9.pdf", type: "قصة أطفال" },
+            { category: "kids", title: "أختنا الجديدة", cover: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hayyi.app/stories/%D8%A7%D8%AE%D8%AA%D9%86%D8%A7%20%D8%A7%D9%84%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9.pdf", type: "قصة أطفال" },
+            { category: "kids", title: "اصنع كعكة", cover: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hayyi.app/stories/%D8%A7%D8%B5%D9%86%D8%B9%20%D9%83%D8%B9%D9%83%D8%B9%D8%A9.pdf", type: "قصة أطفال" },
+            { category: "kids", title: "الجزرة الكبيرة", cover: "https://images.unsplash.com/photo-1447175008436-08417090ea76?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hayyi.app/stories/%D8%A7%D9%84%D8%AC%D8%B2%D8%B1%D8%A9%20%D8%A7%D9%84%D9%83%D8%A8%D9%8A%D8%B1%D8%A9.pdf", type: "قصة أطفال" },
+            { category: "kids", title: "الجمعة يوم الجمعة", cover: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hayyi.app/stories/%D8%A7%D9%84%D8%AC%D9%85%D8%B9%D8%A9%20%D9%8A%D9%88%D9%85%20%D8%A7%D9%84%D8%AC%D9%85%D9%8A%D8%B9.pdf", type: "قصة أطفال" },
+            { category: "kids", title: "الخيمة العجيبة", cover: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hayyi.app/stories/%D8%A7%D9%84%D8%AE%D9%8A%D9%85%D8%A9%20%D8%A7%D9%84%D8%B9%D8%AC%D9%8A%D8%A8%D8%A9%20-%D8%A7%D9%84%D8%B1%D9%88%D8%B6%D8%A9%20%D8%A7%D9%84%D8%A7%D9%81%D8%AA%D8%B1%D8%A7%D8%B6%D9%8A%D8%A9.pdf", type: "قصة أطفال" },
+            { category: "kids", title: "اللقيمات المختلفة", cover: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hayyi.app/stories/%D8%A7%D9%84%D9%84%D9%82%D9%8A%D9%85%D8%A7%D8%AA%20%D8%A7%D9%84%D9%85%D8%AE%D8%AA%D9%84%D9%81%D8%A9.pdf", type: "قصة أطفال" },
+            { category: "kids", title: "المكتبة العامة", cover: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hayyi.app/stories/%D8%A7%D9%84%D9%85%D9%83%D8%AA%D8%A8%D8%A9%20%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9.pdf", type: "قصة أطفال" },
+
+            // قصص الشباب والأدب
+            { category: "youth", title: "قصص وحكايات – العدد الأول", cover: "https://foulabook.com/storage/photo/74696.2021-01-09.1610216629.jpg", pdf: "https://foulabook.com/book/downloading/826019340", type: "أدب عالمي" },
+            { category: "youth", title: "قصص وحكايات – العدد الثاني", cover: "https://foulabook.com/storage/photo/94996.2021-04-15.1618527590.jpg", pdf: "https://foulabook.com/book/downloading/391169792", type: "أدب عالمي" },
+            { category: "youth", title: "القصص القصيرة – أنطون تشيخوف", cover: "https://downloads.hindawi.org/covers/svg/270x360/38509429.svg?v=2", pdf: "https://downloads.hindawi.org/books/38509429.pdf", type: "كلاسيكيات" },
+            { category: "youth", title: "طعم الكرز – أحمد المديني", cover: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hindawi.org/books/90917595/", type: "رواية" },
+            { category: "youth", title: "أنا سلطان قانون الوجود – يوسف إدريس", cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hindawi.org/books/29403629/", type: "أدب عربي" },
+            { category: "youth", title: "انتقام! – روبرت بار", cover: "https://images.unsplash.com/photo-1509021436468-d710779e7013?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hindawi.org/books/90705950/", type: "بوليسي" },
+            { category: "youth", title: "لغز شارع جيكوب – فريمان", cover: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hindawi.org/books/81369493/", type: "غموض" },
+            { category: "youth", title: "عشرون قصة من روائع شكسبير", cover: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80", pdf: "https://www.hindawi.org/books/63708405/", type: "مسرح وأدب" }
+        ];
+
+        function renderBooks() {
+            const grade = document.getElementById('gradeSelect').value;
+            const booksGrid = document.getElementById('booksGrid');
+            const subjects = yemenBooksData[grade] || yemenBooksData["12-sci"];
+
+            document.getElementById('booksCountBadge').innerText = `${subjects.length} مادة دراسية متاحة`;
+
+            booksGrid.innerHTML = subjects.map((item, idx) => `
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm card-hover">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-12 h-12 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center text-navy font-black text-lg">
+                            <i class="fa-solid fa-file-pdf text-red-600"></i>
+                        </div>
+                        <span class="bg-slate-100 text-navy font-bold text-[10px] px-2.5 py-1 rounded-md">كتاب معتمد</span>
+                    </div>
+
+                    <h3 class="font-extrabold text-navy text-lg mb-1">${item.name}</h3>
+                    <p class="text-xs text-slate-500 font-semibold mb-3">وزارة التربية والتعليم اليمنية</p>
+
+                    <!-- Part Selector Dropdown Box -->
+                    <div class="mb-4">
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">اختر الجزء / الكتاب:</label>
+                        <select id="part-select-${idx}" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-navy bg-slate-50 focus:outline-none focus:border-navy">
+                            ${item.parts.map((p, pIdx) => `<option value="${p.url}">${p.name}</option>`).join('')}
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <button onclick="previewSelectedBook('${item.name}', 'part-select-${idx}')" class="w-full bg-navy text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition shadow">
+                            <i class="fa-solid fa-eye text-amber-400"></i>
+                            <span>معاينة الجزء المحدد</span>
+                        </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="downloadSelectedBook('part-select-${idx}')" class="bg-slate-100 text-navy py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 hover:bg-slate-200 transition">
+                                <i class="fa-solid fa-download"></i>
+                                <span>تحميل PDF</span>
+                            </button>
+                            <button onclick="openChatDrawer('${item.name}')" class="bg-slate-100 text-navy py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 hover:bg-slate-200 transition">
+                                <i class="fa-solid fa-robot text-amber-500"></i>
+                                <span>المدرس الذكي</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderStories(filter = 'all') {
+            const grid = document.getElementById('storiesGrid');
+            const filtered = filter === 'all' ? storiesList : storiesList.filter(s => s.category === filter);
+
+            grid.innerHTML = filtered.map(s => `
+                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm card-hover flex flex-col justify-between">
+                    <div>
+                        <div class="h-44 bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                            <img src="${s.cover}" alt="${s.title}" class="w-full h-full object-cover">
+                            <span class="absolute top-2 right-2 bg-navy/80 backdrop-blur-sm text-white text-[10px] font-black px-2.5 py-1 rounded-md">${s.type}</span>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-base font-extrabold text-navy mb-1">${s.title}</h3>
+                            <p class="text-xs text-slate-500 mb-3">نسخة رقمية متاحة للقراءة والتحميل</p>
+                        </div>
+                    </div>
+                    <div class="p-4 border-t border-slate-100 flex gap-2">
+                        <a href="${s.pdf}" target="_blank" class="bg-navy text-white py-2 rounded-xl text-xs font-bold w-full text-center flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-book-open text-amber-400"></i> قراءة / تحميل
+                        </a>
+                        <button onclick="openPaymentModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center" title="تفعيل / دعم">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function previewSelectedBook(name, selectId) {
+            const url = document.getElementById(selectId).value;
+            const selectedText = document.getElementById(selectId).options[document.getElementById(selectId).selectedIndex].text;
+            previewBook(`${name} - ${selectedText}`, url);
+        }
+
+        function downloadSelectedBook(selectId) {
+            const url = document.getElementById(selectId).value;
+            window.open(url, '_blank');
+        }
+
+        function filterStoryCategory(cat) {
+            document.querySelectorAll('.story-cat-btn').forEach(b => {
+                b.className = "story-cat-btn bg-slate-200 text-slate-700 px-4 py-1.5 rounded-lg text-xs font-bold transition";
+            });
+            document.getElementById(`cat-${cat}`).className = "story-cat-btn bg-navy text-white px-4 py-1.5 rounded-lg text-xs font-bold transition";
+            renderStories(cat);
+        }
+
+        function previewBook(name, rawUrl) {
+            currentSubject = name;
+            let fileId = rawUrl.split('id=')[1];
+            let embedUrl = rawUrl.includes('drive.google.com') && fileId 
+                ? `https://drive.google.com/file/d/${fileId}/preview` 
+                : rawUrl;
+            document.getElementById('previewModalTitle').innerText = `معاينة: ${name}`;
+            document.getElementById('previewDownloadBtn').href = rawUrl;
+            document.getElementById('pdfViewerFrame').src = embedUrl;
+            document.getElementById('previewModal').classList.remove('hidden');
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden');
+            document.getElementById('pdfViewerFrame').src = "";
+        }
+
+        function openChatFromPreview() {
+            closePreviewModal();
+            openChatDrawer(currentSubject);
+        }
+
+        function openChatDrawer(subjectName) {
+            currentSubject = subjectName;
+            document.getElementById('chatSubjectTitle').innerText = subjectName;
+            document.getElementById('currentChatContextBadge').innerText = `المادة: ${subjectName}`;
+            document.getElementById('aiChatDrawer').classList.remove('-translate-x-full');
+        }
+
+        function closeChatDrawer() {
+            document.getElementById('aiChatDrawer').classList.add('-translate-x-full');
+        }
+
+        function cleanAiResponse(text) {
+            return text
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '• ')
+                .replace(/###/g, '')
+                .replace(/##/g, '');
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const box = document.getElementById('chatMessages');
+
+            box.innerHTML += `
+                <div class="chat-user p-3 text-xs max-w-[85%] self-end">
+                    ${msg}
+                </div>
+            `;
+            input.value = "";
+            box.scrollTop = box.scrollHeight;
+
+            const loadingId = "loader-" + Date.now();
+            box.innerHTML += `
+                <div id="${loadingId}" class="flex items-start gap-2">
+                    <div class="w-6 h-6 rounded bg-navy text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-robot"></i></div>
+                    <div class="chat-ai p-3 text-xs"><i class="fa-solid fa-spinner fa-spin"></i> المدرس الذكي يتأمل الإجابة...</div>
+                </div>
+            `;
+            box.scrollTop = box.scrollHeight;
+
+            try {
+                const prompt = `أنت مدرس يمني متخصص ومتمرس لمادة (${currentSubject}). أجب على السؤال بصورة ميسرة ومنظمة بدون استخدام أية نجوم أو رموز Markdown غريبة: ${msg}`;
+                const res = await fetch("https://text.pollinations.ai/", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: [{ role: "user", content: prompt }], model: "openai" })
+                });
+                const replyRaw = await res.text();
+                const replyCleaned = cleanAiResponse(replyRaw);
+
+                document.getElementById(loadingId).outerHTML = `
+                    <div class="flex items-start gap-2">
+                        <div class="w-6 h-6 rounded bg-navy text-white flex items-center justify-center text-[10px] flex-shrink-0"><i class="fa-solid fa-robot"></i></div>
+                        <div class="chat-ai p-3.5 text-xs shadow-sm leading-relaxed whitespace-pre-line">${replyCleaned}</div>
+                    </div>
+                `;
+            } catch (err) {
+                document.getElementById(loadingId).outerHTML = `<div class="chat-ai p-3 text-xs text-red-600">تعذر الاتصال بالمدرس الذكي، حاول لاحقاً.</div>`;
+            }
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function sendQuickPrompt(promptText) {
+            document.getElementById('chatInput').value = promptText;
+            sendChatMessage();
+        }
+
+        function handleKeyPress(e) { if (e.key === 'Enter') sendChatMessage(); }
+
+        function clearChatHistory() {
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="flex items-start gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-navy text-white flex items-center justify-center text-xs flex-shrink-0"><i class="fa-solid fa-robot"></i></div>
+                    <div class="chat-ai p-3.5 shadow-sm">تم مسح المحادثة. اسأل المدرس الذكي أي سؤال جديد! 🎓</div>
+                </div>
+            `;
+        }
+
+        function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
+        function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text);
+            alert("تم نسخ رقم الحساب بنجاح: " + text);
+        }
+
+        function openLoginModal() { document.getElementById('loginModal').classList.remove('hidden'); }
+        function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
+
+        function saveStudentProfile(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentNameInput').value;
+            const grade = document.getElementById('studentGradeInput').value;
+            localStorage.setItem('student_name', name);
+            localStorage.setItem('student_grade', grade);
+            
+            document.getElementById('userAuthName').innerText = name;
+            document.getElementById('studentGreeting').innerText = `مرحباً بك يا ${name}! نتمنى لك دوام التوفيق والتفوق.`;
+            document.getElementById('gradeSelect').value = grade;
+            renderBooks();
+            closeLoginModal();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-4 py-1.5 text-slate-600 hover:text-navy transition";
+            });
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.className = "tab-btn px-4 py-1.5 rounded-lg bg-navy text-white transition shadow-sm";
+            }
+        }
+
+        function filterBooks() {
+            const q = document.getElementById('curriculumSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('#booksGrid > div');
+            cards.forEach(c => {
+                const title = c.querySelector('h3').innerText.toLowerCase();
+                c.style.display = title.includes(q) ? 'block' : 'none';
+            });
+        }
+
+        window.onload = function() {
+            renderBooks();
+            renderStories();
+            const savedName = localStorage.getItem('student_name');
+            if (savedName) {
+                document.getElementById('userAuthName').innerText = savedName;
+                document.getElementById('studentGreeting').innerText = `مرحباً بك مجدداً يا ${savedName}! نتمنى لك دوام التفوق.`;
+            }
+        };
+    </script>
+</body>
+</html>
